@@ -62,8 +62,12 @@ public:
     /** Internal helper for initializing the embedded JS engine. */
     void initJavaScriptEngine();
 
+    /** Register node types required by the DSP graph. */
+    void registerNodeTypes();
+
     /** Internal helper for propagating processor state changes. */
     void dispatchStateChange();
+    void dispatchDspEvents();
     void dispatchError(std::string const& name, std::string const& message);
 
 private:

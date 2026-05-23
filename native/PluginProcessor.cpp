@@ -2,6 +2,7 @@
 #include "WebViewEditor.h"
 
 #include <choc_javascript_QuickJS.h>
+#include <FFT.h>
 
 
 //==============================================================================
@@ -91,7 +92,7 @@ EffectsPluginProcessor::~EffectsPluginProcessor()
 //==============================================================================
 juce::AudioProcessorEditor* EffectsPluginProcessor::createEditor()
 {
-    return new WebViewEditor(this, getAssetsDirectory(), 800, 704);
+    return new WebViewEditor(this, getAssetsDirectory(), 1200, 700);
 }
 
 bool EffectsPluginProcessor::hasEditor() const
@@ -178,11 +179,9 @@ void EffectsPluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     // Copy the input so that our input and output buffers are distinct
     scratchBuffer.makeCopyOf(buffer, true);
 
-    // Clear the output buffer to prevent any garbage if our runtime isn't ready
-    buffer.clear();
-
     // Process the elementary runtime
     if (runtime != nullptr) {
+        // The runtime writes the processed signal into the output buffer.
         runtime->process(
             const_cast<const float**>(scratchBuffer.getArrayOfWritePointers()),
             getTotalNumInputChannels(),
@@ -191,7 +190,12 @@ void EffectsPluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
             buffer.getNumSamples(),
             nullptr
         );
+    } else {
+        // If the runtime has not finished initializing yet, keep the dry signal alive.
+        buffer.makeCopyOf(scratchBuffer, true);
     }
+
+    triggerAsyncUpdate();
 }
 
 void EffectsPluginProcessor::parameterValueChanged (int parameterIndex, float newValue)
@@ -211,13 +215,17 @@ void EffectsPluginProcessor::parameterGestureChanged (int, bool)
 //==============================================================================
 void EffectsPluginProcessor::handleAsyncUpdate()
 {
+    bool shouldDispatchState = false;
+
     // First things first, we check the flag to identify if we should initialize the Elementary
     // runtime and engine.
     if (shouldInitialize.exchange(false)) {
         // TODO: This is definitely not thread-safe! It could delete a Runtime instance while
         // the real-time thread is using it. Depends on when the host will call prepareToPlay.
         runtime = std::make_unique<elem::Runtime<float>>(lastKnownSampleRate, lastKnownBlockSize);
+        registerNodeTypes();
         initJavaScriptEngine();
+        shouldDispatchState = true;
     }
 
     // Next we iterate over the current parameter values to update our local state
@@ -240,11 +248,15 @@ void EffectsPluginProcessor::handleAsyncUpdate()
             if (auto* pf = dynamic_cast<juce::AudioParameterFloat*>(params[i])) {
                 auto paramId = pf->paramID.toStdString();
                 state.insert_or_assign(paramId, elem::js::Number(pr.value));
+                shouldDispatchState = true;
             }
         }
     }
 
-    dispatchStateChange();
+    if (shouldDispatchState) {
+        dispatchStateChange();
+    }
+    dispatchDspEvents();
 }
 
 void EffectsPluginProcessor::initJavaScriptEngine()
@@ -340,6 +352,17 @@ void EffectsPluginProcessor::initJavaScriptEngine()
     jsContext.evaluate(expr);
 }
 
+void EffectsPluginProcessor::registerNodeTypes()
+{
+    if (runtime == nullptr) {
+        return;
+    }
+
+    runtime->registerNodeType("fft", [](elem::NodeId const id, double fs, int const bs) {
+        return std::make_shared<elem::FFTNode<float>>(id, fs, bs);
+    });
+}
+
 void EffectsPluginProcessor::dispatchStateChange()
 {
     const auto* kDispatchScript = R"script(
@@ -368,6 +391,43 @@ void EffectsPluginProcessor::dispatchStateChange()
 
     // Next we dispatch to the local engine which will evaluate any necessary JavaScript synchronously
     // here on the main thread
+    jsContext.evaluate(expr);
+}
+
+void EffectsPluginProcessor::dispatchDspEvents()
+{
+    if (runtime == nullptr) {
+        return;
+    }
+
+    elem::js::Array batch;
+    runtime->processQueuedEvents([&batch](std::string const& type, elem::js::Value evt) {
+        batch.push_back(elem::js::Object({
+            {"type", type},
+            {"event", evt}
+        }));
+    });
+
+    if (batch.size() <= 0) {
+        return;
+    }
+
+    const auto* kDispatchScript = R"script(
+(function() {
+  if (typeof globalThis.__receiveDspEvents__ !== 'function')
+    return false;
+
+  globalThis.__receiveDspEvents__(%);
+  return true;
+})();
+)script";
+
+    auto expr = juce::String(kDispatchScript).replace("%", elem::js::serialize(elem::js::serialize(batch))).toStdString();
+
+    if (auto* editor = static_cast<WebViewEditor*>(getActiveEditor())) {
+        editor->getWebViewPtr()->evaluateJavascript(expr);
+    }
+
     jsContext.evaluate(expr);
 }
 

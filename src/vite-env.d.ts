@@ -1,7 +1,9 @@
 /// <reference types="vite/client" />
 
 declare global {
-  type PluginState = Record<string, number>;
+  type PluginState = {
+    sampleRate?: number;
+  } & Record<string, number>;
 
   type PluginError = {
     name?: string;
@@ -17,6 +19,7 @@ declare global {
   var __receiveStateChange__: (state: string) => void;
   var __receiveError__: (error: PluginError) => void;
   var __receiveHydrationData__: (data: string) => void;
+  var __receiveDspEvents__: (data: string) => void;
 }
 
 export {};

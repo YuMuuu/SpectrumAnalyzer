@@ -1,4 +1,5 @@
 import path from 'node:path'
+import fs from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { chromium } from 'playwright'
 
@@ -11,19 +12,10 @@ const pluginViewports = [
   { name: 'wide', width: 1200, height: 700 },
 ]
 
-const knobViewports = [
-  { name: 'compact', width: 240, height: 240 },
-  { name: 'standard', width: 400, height: 320 },
-]
-
 const targets = [
-  { id: 'plugin-interface--default', name: 'interface-default', viewports: pluginViewports },
-  { id: 'plugin-interface--dry-small-room', name: 'interface-dry-small-room', viewports: pluginViewports },
-  { id: 'plugin-interface--wide-lush', name: 'interface-wide-lush', viewports: pluginViewports },
-  { id: 'plugin-interface--with-error', name: 'interface-with-error', viewports: pluginViewports },
-  { id: 'controls-knob--default', name: 'knob-default', viewports: knobViewports },
-  { id: 'controls-knob--minimum', name: 'knob-minimum', viewports: knobViewports },
-  { id: 'controls-knob--maximum', name: 'knob-maximum', viewports: knobViewports },
+  { id: 'plugin-spectrumanalyzer--default', name: 'spectrum-default', viewports: pluginViewports },
+  { id: 'plugin-spectrumanalyzer--dense-room', name: 'spectrum-dense-room', viewports: pluginViewports },
+  { id: 'plugin-spectrumanalyzer--with-error', name: 'spectrum-with-error', viewports: pluginViewports },
 ]
 
 function storyUrl(storyId) {
@@ -88,7 +80,13 @@ async function collectLayoutInfo(page) {
 async function main() {
   await mkdir(outputDir, { recursive: true })
 
-  const browser = await chromium.launch()
+  const chromePath = process.env.PLAYWRIGHT_CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  const headless = process.env.STORYBOOK_HEADLESS !== 'false'
+  const launchOptions = fs.existsSync(chromePath)
+    ? { executablePath: chromePath, headless }
+    : { headless }
+
+  const browser = await chromium.launch(launchOptions)
   const manifest = []
 
   try {
