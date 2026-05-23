@@ -55,7 +55,9 @@ export default function SpectrumAnalyzer(props: SpectrumAnalyzerProps) {
         <div className="relative mx-auto flex h-full w-full max-w-[1500px] flex-col rounded-[2rem] border border-gotham-line bg-gotham-window/92 p-4 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:p-6">
           <header className="flex flex-wrap items-end justify-between gap-4 border-b border-gotham-line pb-4">
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-[0.3em] text-gotham-text sm:text-4xl">
+              <h1
+                className="text-3xl font-semibold tracking-[0.3em] text-gotham-text sm:text-4xl"
+              >
                 SPECTRUM ANALYZER
               </h1>
             </div>

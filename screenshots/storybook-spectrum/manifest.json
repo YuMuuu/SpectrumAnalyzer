@@ -1,0 +1,290 @@
+[
+  {
+    "storyId": "plugin-spectrumanalyzer--default",
+    "storyName": "spectrum-default",
+    "viewport": {
+      "name": "min",
+      "width": 492,
+      "height": 238
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--default&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-default-min-492x238.png",
+    "layout": {
+      "viewport": {
+        "width": 492,
+        "height": 238
+      },
+      "body": {
+        "scrollWidth": 492,
+        "scrollHeight": 238
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 492,
+        "height": 238,
+        "top": 0,
+        "right": 492,
+        "bottom": 238,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--default",
+    "storyName": "spectrum-default",
+    "viewport": {
+      "name": "standard",
+      "width": 800,
+      "height": 400
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--default&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-default-standard-800x400.png",
+    "layout": {
+      "viewport": {
+        "width": 800,
+        "height": 400
+      },
+      "body": {
+        "scrollWidth": 800,
+        "scrollHeight": 400
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 800,
+        "height": 400,
+        "top": 0,
+        "right": 800,
+        "bottom": 400,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--default",
+    "storyName": "spectrum-default",
+    "viewport": {
+      "name": "wide",
+      "width": 1200,
+      "height": 700
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--default&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-default-wide-1200x700.png",
+    "layout": {
+      "viewport": {
+        "width": 1200,
+        "height": 700
+      },
+      "body": {
+        "scrollWidth": 1200,
+        "scrollHeight": 700
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 700,
+        "top": 0,
+        "right": 1200,
+        "bottom": 700,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--dense-room",
+    "storyName": "spectrum-dense-room",
+    "viewport": {
+      "name": "min",
+      "width": 492,
+      "height": 238
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--dense-room&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-dense-room-min-492x238.png",
+    "layout": {
+      "viewport": {
+        "width": 492,
+        "height": 238
+      },
+      "body": {
+        "scrollWidth": 492,
+        "scrollHeight": 238
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 492,
+        "height": 238,
+        "top": 0,
+        "right": 492,
+        "bottom": 238,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--dense-room",
+    "storyName": "spectrum-dense-room",
+    "viewport": {
+      "name": "standard",
+      "width": 800,
+      "height": 400
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--dense-room&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-dense-room-standard-800x400.png",
+    "layout": {
+      "viewport": {
+        "width": 800,
+        "height": 400
+      },
+      "body": {
+        "scrollWidth": 800,
+        "scrollHeight": 400
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 800,
+        "height": 400,
+        "top": 0,
+        "right": 800,
+        "bottom": 400,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--dense-room",
+    "storyName": "spectrum-dense-room",
+    "viewport": {
+      "name": "wide",
+      "width": 1200,
+      "height": 700
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--dense-room&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-dense-room-wide-1200x700.png",
+    "layout": {
+      "viewport": {
+        "width": 1200,
+        "height": 700
+      },
+      "body": {
+        "scrollWidth": 1200,
+        "scrollHeight": 700
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 700,
+        "top": 0,
+        "right": 1200,
+        "bottom": 700,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--with-error",
+    "storyName": "spectrum-with-error",
+    "viewport": {
+      "name": "min",
+      "width": 492,
+      "height": 238
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--with-error&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-with-error-min-492x238.png",
+    "layout": {
+      "viewport": {
+        "width": 492,
+        "height": 238
+      },
+      "body": {
+        "scrollWidth": 492,
+        "scrollHeight": 238
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 492,
+        "height": 238,
+        "top": 0,
+        "right": 492,
+        "bottom": 238,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--with-error",
+    "storyName": "spectrum-with-error",
+    "viewport": {
+      "name": "standard",
+      "width": 800,
+      "height": 400
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--with-error&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-with-error-standard-800x400.png",
+    "layout": {
+      "viewport": {
+        "width": 800,
+        "height": 400
+      },
+      "body": {
+        "scrollWidth": 800,
+        "scrollHeight": 400
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 800,
+        "height": 400,
+        "top": 0,
+        "right": 800,
+        "bottom": 400,
+        "left": 0
+      },
+      "canvases": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--with-error",
+    "storyName": "spectrum-with-error",
+    "viewport": {
+      "name": "wide",
+      "width": 1200,
+      "height": 700
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--with-error&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-with-error-wide-1200x700.png",
+    "layout": {
+      "viewport": {
+        "width": 1200,
+        "height": 700
+      },
+      "body": {
+        "scrollWidth": 1200,
+        "scrollHeight": 700
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 700,
+        "top": 0,
+        "right": 1200,
+        "bottom": 700,
+        "left": 0
+      },
+      "canvases": []
+    }
+  }
+]

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 @theme {
   --color-gotham-shell: #050b14;
   --color-gotham-window: #07111f;
