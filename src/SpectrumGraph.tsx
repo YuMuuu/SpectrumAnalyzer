@@ -20,7 +20,7 @@ function formatHz(value: number) {
   }
 
   if (value >= 1000) {
-    return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)} kHz`;
+    return `${Math.round(value / 1000)} kHz`;
   }
 
   return `${Math.round(value)} Hz`;
@@ -29,6 +29,11 @@ function formatHz(value: number) {
 function lerp(a: number, b: number, t: number) {
   return a + ((b - a) * t);
 }
+
+const minDb = -120;
+const maxDb = 0;
+const minHz = 10;
+const maxHz = 20000;
 
 function resampleBars(bars: SpectrumBin[], targetCount: number): SpectrumBin[] {
   if (bars.length === 0 || targetCount <= 0) {
@@ -65,23 +70,25 @@ export default function SpectrumGraph({bars, sampleRate, fftSize, className}: Sp
   const axisLabelFontSize = '10px';
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
-  const nyquist = sampleRate / 2;
-  const gridHz = [20, 100, 1000, 5000, nyquist].filter((value, index, values) => value > 0 && values.indexOf(value) === index);
+  const upperHz = Math.min(maxHz, sampleRate / 2);
+  const gridHz = [minHz, 100, 1000, 10000, upperHz].filter((value, index, values) => value > 0 && values.indexOf(value) === index);
+  const gridDb = [0, -15, -30, -60, -90, -120];
 
   const points = resampleBars(
     bars.length > 0 ? bars : Array.from({ length: 72 }, () => ({ level: 0, peak: 0 })),
     Math.max(2, (bars.length > 0 ? bars.length : 72) * 2),
   );
 
+  function levelToY(level: number) {
+    return padding.top + ((1 - clampUnit(level)) * plotHeight);
+  }
+
   const linePoints = points.map((bar, index) => {
     const x = padding.left + (index / Math.max(1, points.length - 1)) * plotWidth;
-    const magnitudeDb = -96 + (clampUnit(bar.level) * 96);
-    const y = padding.top + ((1 - clampUnit(bar.level)) * plotHeight);
 
     return {
       x,
-      y,
-      db: magnitudeDb,
+      y: levelToY(bar.level),
     };
   });
 
@@ -97,7 +104,7 @@ export default function SpectrumGraph({bars, sampleRate, fftSize, className}: Sp
     : '';
 
   const xTicks = gridHz.map((hz) => {
-    const ratio = nyquist > 0 ? Math.log10(Math.max(hz, 20) / 20) / Math.log10(Math.max(nyquist, 20) / 20) : 0;
+    const ratio = upperHz > minHz ? Math.log10(Math.max(hz, minHz) / minHz) / Math.log10(upperHz / minHz) : 0;
     const x = padding.left + clampUnit(ratio) * plotWidth;
 
     return { hz, x };
@@ -121,6 +128,17 @@ export default function SpectrumGraph({bars, sampleRate, fftSize, className}: Sp
         </defs>
 
         <rect x="0" y="0" width={width} height={height} rx="20" fill="rgba(5, 11, 20, 0.92)" />
+
+        {gridDb.map((db) => {
+          const ratio = clampUnit((db - minDb) / (maxDb - minDb));
+          const y = padding.top + ((1 - ratio) * plotHeight);
+
+          return (
+            <g key={db}>
+              <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="rgba(145, 166, 191, 0.10)" strokeWidth="1" />
+            </g>
+          );
+        })}
 
         {xTicks.map(({hz, x}) => (
           <g key={hz}>

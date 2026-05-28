@@ -4,7 +4,6 @@
 #include <choc_javascript_QuickJS.h>
 #include <FFT.h>
 
-
 //==============================================================================
 // A quick helper for locating bundled asset files
 juce::File getAssetsDirectory()
@@ -412,6 +411,33 @@ void EffectsPluginProcessor::dispatchDspEvents()
         return;
     }
 
+    auto serializedBatch = elem::js::serialize(batch);
+
+    try {
+        auto hasTransform = jsContext.evaluate(R"script(
+(function() {
+  return typeof globalThis.__transformDspEvents__ === 'function';
+})();
+)script");
+
+        if (!hasTransform.getWithDefault<bool>(false)) {
+            dispatchError("DSP Transform Error", "__transformDspEvents__ is not registered");
+            return;
+        }
+
+        auto transformed = jsContext.invoke("__transformDspEvents__", serializedBatch);
+
+        if (!transformed.isString()) {
+            dispatchError("DSP Transform Error", "__transformDspEvents__ did not return a JSON string");
+            return;
+        }
+
+        serializedBatch = std::string(transformed.getString());
+    } catch (const choc::javascript::Error& error) {
+        dispatchError("DSP Transform Error", error.what());
+        return;
+    }
+
     const auto* kDispatchScript = R"script(
 (function() {
   if (typeof globalThis.__receiveDspEvents__ !== 'function')
@@ -422,13 +448,11 @@ void EffectsPluginProcessor::dispatchDspEvents()
 })();
 )script";
 
-    auto expr = juce::String(kDispatchScript).replace("%", elem::js::serialize(elem::js::serialize(batch))).toStdString();
+    auto expr = juce::String(kDispatchScript).replace("%", elem::js::serialize(serializedBatch)).toStdString();
 
     if (auto* editor = static_cast<WebViewEditor*>(getActiveEditor())) {
         editor->getWebViewPtr()->evaluateJavascript(expr);
     }
-
-    jsContext.evaluate(expr);
 }
 
 void EffectsPluginProcessor::dispatchError(std::string const& name, std::string const& message)

@@ -20,6 +20,7 @@ declare global {
   var __receiveError__: (error: PluginError) => void;
   var __receiveHydrationData__: (data: string) => void;
   var __receiveDspEvents__: (data: string) => void;
+  var __transformDspEvents__: (data: string) => string;
 }
 
 export {};

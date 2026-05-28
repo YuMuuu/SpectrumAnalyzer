@@ -13,8 +13,9 @@ type DspFftEvent = {
   event: {
     source?: string;
     data: {
-      real: number[];
-      imag: number[];
+      db?: number[];
+      real?: number[];
+      imag?: number[];
     };
   };
 };
@@ -30,42 +31,86 @@ type AnalyzerState = {
   leftSpectrum: SpectrumBin[];
   rightSpectrum: SpectrumBin[];
   spectrum: SpectrumBin[];
+  dspEventCount: number;
   error: PluginError | null;
 };
 
 const barCount = 72;
+const minDisplayHz = 10;
+const maxDisplayHz = 20000;
+const minDb = -120;
+const maxDb = 0;
+const attackSmoothing = 0.65;
+const releaseSmoothing = 0.18;
+const peakReleasePerFrame = 0.012;
+const floorAmplitude = 1e-12;
 
 function clampUnit(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
-function magnitudeToLevel(value: number) {
-  const db = 20 * Math.log10(Math.max(value, 1e-7));
-  return clampUnit((db + 88) / 88);
+function dbToLevel(db: number) {
+  return clampUnit((db - minDb) / (maxDb - minDb));
 }
 
-function resampleBins(levels: number[], peaks: number[]) {
-  if (levels.length === 0) {
+function rawFftToDb(real: number[], imag: number[]) {
+  const complexSize = real.length;
+  const fftSize = Math.max(2, (complexSize - 1) * 2);
+  const amplitudeScale = 1 / fftSize;
+
+  return Array.from({ length: complexSize }, (_, index) => {
+    const singleSidedScale = (index === 0 || index === complexSize - 1) ? 1 : 2;
+    const magnitude = Math.hypot(real[index] ?? 0, imag[index] ?? 0);
+    const normalizedAmplitude = Math.max(floorAmplitude, magnitude * singleSidedScale * amplitudeScale);
+
+    return 20 * Math.log10(normalizedAmplitude);
+  });
+}
+
+function resampleBins(binDb: number[], sampleRate: number) {
+  if (binDb.length === 0) {
     return Array.from({ length: barCount }, () => ({ level: 0, peak: 0 }));
   }
 
-  const sourceCount = levels.length;
+  const sourceCount = binDb.length;
+  const nyquist = sampleRate / 2;
+  const maxHz = Math.min(maxDisplayHz, nyquist);
+  const sourceMaxIndex = Math.max(1, sourceCount - 1);
+  const logSpan = Math.max(1, maxHz / minDisplayHz);
 
   return Array.from({ length: barCount }, (_, barIndex) => {
-    const start = Math.floor((barIndex / barCount) * sourceCount);
-    const end = Math.max(start + 1, Math.floor(((barIndex + 1) / barCount) * sourceCount));
+    const startRatio = barIndex / barCount;
+    const endRatio = (barIndex + 1) / barCount;
+    const startHz = barIndex === 0 ? 0 : minDisplayHz * Math.pow(logSpan, startRatio);
+    const endHz = barIndex === barCount - 1 ? maxHz : minDisplayHz * Math.pow(logSpan, endRatio);
+    const start = Math.max(0, Math.min(sourceCount - 1, Math.floor((startHz / nyquist) * sourceMaxIndex)));
+    const end = Math.max(start + 1, Math.min(sourceCount, Math.ceil((endHz / nyquist) * sourceMaxIndex)));
 
-    let level = 0;
-    let peak = 0;
+    let db = minDb;
 
     for (let i = start; i < end && i < sourceCount; ++i) {
-      level = Math.max(level, levels[i]);
-      peak = Math.max(peak, peaks[i] ?? 0);
+      db = Math.max(db, binDb[i]);
     }
+
+    const level = dbToLevel(db);
 
     return {
       level,
-      peak,
+      peak: level,
+    };
+  });
+}
+
+function smoothSpectrum(previous: SpectrumBin[], next: SpectrumBin[]) {
+  return next.map((bin, index) => {
+    const prev = previous[index] ?? { level: 0, peak: 0 };
+    const smoothing = bin.level >= prev.level ? attackSmoothing : releaseSmoothing;
+    const level = prev.level + ((bin.level - prev.level) * smoothing);
+    const peak = Math.max(bin.level, prev.peak - peakReleasePerFrame);
+
+    return {
+      level,
+      peak: clampUnit(peak),
     };
   });
 }
@@ -84,17 +129,34 @@ function combineSpectra(left: SpectrumBin[], right: SpectrumBin[]) {
 }
 
 function mergeFftEvent(state: AnalyzerState, evt: DspFftEvent) {
-  const {real, imag} = evt.event.data;
-  const levels = real.map((re, index) => magnitudeToLevel(Math.hypot(re, imag[index] ?? 0)));
-  const peaks = levels.map((level) => Math.min(1, level + 0.02));
-  const bins = resampleBins(levels, peaks);
+  const db = Array.isArray(evt.event.data.db)
+    ? evt.event.data.db
+    : Array.isArray(evt.event.data.real) && Array.isArray(evt.event.data.imag)
+      ? rawFftToDb(evt.event.data.real, evt.event.data.imag)
+      : null;
+
+  if (!db) {
+    return {
+      ...state,
+      dspEventCount: state.dspEventCount + 1,
+      error: {
+        name: 'DSP Event Error',
+        message: 'FFT event payload is missing both db and real/imag arrays.',
+      },
+    };
+  }
+
+  const fftSize = Math.max(2, (db.length - 1) * 2);
+  const bins = resampleBins(db, state.sampleRate);
   const isRight = (evt.event.source ?? '').toLowerCase().includes('right');
-  const leftSpectrum = isRight ? state.leftSpectrum : bins;
-  const rightSpectrum = isRight ? bins : state.rightSpectrum;
+  const leftSpectrum = isRight ? state.leftSpectrum : smoothSpectrum(state.leftSpectrum, bins);
+  const rightSpectrum = isRight ? smoothSpectrum(state.rightSpectrum, bins) : state.rightSpectrum;
 
   return {
     ...state,
-    fftSize: Math.max(2, (real.length - 1) * 2),
+    fftSize,
+    dspEventCount: state.dspEventCount + 1,
+    error: null,
     leftSpectrum,
     rightSpectrum,
     spectrum: combineSpectra(leftSpectrum, rightSpectrum),
@@ -107,6 +169,7 @@ const store = createStore<AnalyzerState>(() => ({
   leftSpectrum: Array.from({ length: barCount }, () => ({ level: 0, peak: 0 })),
   rightSpectrum: Array.from({ length: barCount }, () => ({ level: 0, peak: 0 })),
   spectrum: Array.from({ length: barCount }, () => ({ level: 0, peak: 0 })),
+  dspEventCount: 0,
   error: null,
 }));
 

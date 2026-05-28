@@ -6,7 +6,6 @@
 #include <choc_javascript.h>
 #include <elem/Runtime.h>
 
-
 //==============================================================================
 class EffectsPluginProcessor
     : public juce::AudioProcessor,
