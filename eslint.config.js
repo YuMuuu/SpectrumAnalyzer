@@ -5,6 +5,7 @@ import importPlugin from 'eslint-plugin-import';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+// eslint-disable-next-line import/no-named-as-default
 import tseslint from 'typescript-eslint';
 
 const compat = new FlatCompat({
@@ -19,9 +20,10 @@ const tsFiles = ['src/**/*.{ts,tsx}', 'dsp/**/*.ts', '.storybook/**/*.ts', 'vite
 export default tseslint.config(
   {
     ignores: [
-      'dist',
-      'native',
-      'node_modules',
+      'dist/**',
+      'storybook-static/**',
+      'native/**',
+      'node_modules/**',
       'public/dsp.main.js',
     ],
   },
@@ -61,6 +63,7 @@ export default tseslint.config(
     rules: {
       ...importPlugin.flatConfigs.typescript.rules,
       'no-undef': 'off',
+      'import/no-unresolved': ['error', { ignore: ['^typescript-eslint$'] }],
     },
   },
   {
@@ -113,6 +116,13 @@ export default tseslint.config(
       globals: {
         ...globals.node,
         ...globals.browser,
+        $: 'readonly',
+        echo: 'readonly',
+        cd: 'readonly',
+        argv: 'readonly',
+        path: 'readonly',
+        fs: 'readonly',
+        __dirname: 'readonly',
       },
     },
   },

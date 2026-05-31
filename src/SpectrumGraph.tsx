@@ -67,7 +67,7 @@ export default function SpectrumGraph({bars, sampleRate, fftSize, className}: Sp
   const width = 1000;
   const height = 560;
   const padding = { top: 28, right: 28, bottom: 64, left: 28 };
-  const axisLabelFontSize = '10px';
+  const axisLabelFontSize = 'var(--spectrum-axis-label-font-size, 10px)';
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
   const upperHz = Math.min(maxHz, sampleRate / 2);
@@ -150,12 +150,17 @@ export default function SpectrumGraph({bars, sampleRate, fftSize, className}: Sp
         <path d={linePath} fill="none" stroke="#61e8d6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
 
-      <div className="pointer-events-none absolute inset-0">
-        {xTicks.map(({hz, x}) => (
+      <div className="spectrum-axis-labels pointer-events-none absolute inset-0">
+        {xTicks.map(({hz, x}, index) => (
           <div
             key={hz}
-            className="absolute -translate-x-1/2 whitespace-nowrap text-gotham-text/78"
-            style={{ left: `${(x / width) * 100}%`, top: `${((height - 20) / height) * 100}%` }}
+            className={[
+              'spectrum-axis-label absolute whitespace-nowrap text-gotham-text/78',
+              index === 0 ? 'spectrum-axis-label-first' : '',
+              index === xTicks.length - 1 ? 'spectrum-axis-label-last' : '',
+              hz === 10000 ? 'spectrum-axis-label-10khz' : '',
+            ].filter(Boolean).join(' ')}
+            style={{ left: `${(x / width) * 100}%`, top: '78%' }}
           >
             <span className="block select-none whitespace-nowrap font-normal leading-none tracking-[0.08em]" style={{ fontSize: axisLabelFontSize }}>
               {formatHz(hz)}

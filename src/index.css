@@ -44,3 +44,110 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.spectrum-visuals {
+  flex-direction: row;
+}
+
+.spectrum-graph {
+  min-height: 0;
+}
+
+.spectrum-meter {
+  height: auto;
+  width: 112px;
+}
+
+.spectrum-axis-label {
+  transform: translateX(-50%);
+}
+
+.spectrum-axis-label-first {
+  transform: translateX(0);
+}
+
+.spectrum-axis-label-last {
+  transform: translateX(-100%);
+}
+
+@media (max-height: 320px), (max-width: 560px) {
+  .spectrum-shell {
+    padding: 8px;
+  }
+
+  .spectrum-frame {
+    border-radius: 18px;
+    padding: 10px;
+  }
+
+  .spectrum-header {
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  .spectrum-title {
+    font-size: 20px;
+    line-height: 1.05;
+    letter-spacing: 0.18em;
+  }
+
+  .spectrum-stats {
+    gap: 5px;
+  }
+
+  .spectrum-stat-pill {
+    padding: 3px 8px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+
+  .spectrum-main {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .spectrum-panel {
+    border-radius: 14px;
+    padding: 8px;
+  }
+
+  .spectrum-meter {
+    height: auto;
+    width: 92px;
+  }
+
+  .spectrum-graph {
+    border-radius: 10px;
+  }
+
+  .spectrum-meter-inner {
+    gap: 6px;
+  }
+
+  .spectrum-meter-labels {
+    font-size: 8px;
+  }
+
+  .spectrum-axis-label-10khz {
+    display: none;
+  }
+
+  .spectrum-axis-labels {
+    --spectrum-axis-label-font-size: 9px;
+  }
+}
+
+@media (max-height: 250px) {
+  .spectrum-title {
+    font-size: 18px;
+  }
+
+  .spectrum-stat-pill {
+    font-size: 8px;
+  }
+
+  .spectrum-axis-labels {
+    font-size: 9px;
+  }
+}

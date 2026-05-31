@@ -15,6 +15,7 @@ const pluginViewports = [
 const targets = [
   { id: 'plugin-spectrumanalyzer--default', name: 'spectrum-default', viewports: pluginViewports },
   { id: 'plugin-spectrumanalyzer--dense-room', name: 'spectrum-dense-room', viewports: pluginViewports },
+  { id: 'plugin-spectrumanalyzer--neon-lift', name: 'spectrum-neon-lift', viewports: pluginViewports },
   { id: 'plugin-spectrumanalyzer--with-error', name: 'spectrum-with-error', viewports: pluginViewports },
 ]
 
@@ -39,6 +40,8 @@ async function collectLayoutInfo(page) {
     })
 
     const storyRoot = document.querySelector('#storybook-root')
+    const viewportWidth = document.documentElement.clientWidth
+    const viewportHeight = document.documentElement.clientHeight
     const canvases = Array.from(document.querySelectorAll('canvas')).map((canvas) => {
       const ctx = canvas.getContext('2d')
       const imageData = ctx && canvas.width > 0 && canvas.height > 0
@@ -61,11 +64,90 @@ async function collectLayoutInfo(page) {
         nonTransparentPixels,
       }
     })
+    const textRanges = []
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+    const epsilon = 0.5
+    const mergeOverflow = (a, b) => ({
+      left: a.left || b.left,
+      top: a.top || b.top,
+      right: a.right || b.right,
+      bottom: a.bottom || b.bottom,
+    })
+    const getClipBox = (element) => {
+      let clip = {
+        left: 0,
+        top: 0,
+        right: viewportWidth,
+        bottom: viewportHeight,
+      }
+      let current = element
+
+      while (current && current !== document.documentElement) {
+        const styles = window.getComputedStyle(current)
+        const clipsX = styles.overflowX !== 'visible'
+        const clipsY = styles.overflowY !== 'visible'
+
+        if (clipsX || clipsY) {
+          const rect = current.getBoundingClientRect()
+          clip = {
+            left: clipsX ? Math.max(clip.left, rect.left) : clip.left,
+            top: clipsY ? Math.max(clip.top, rect.top) : clip.top,
+            right: clipsX ? Math.min(clip.right, rect.right) : clip.right,
+            bottom: clipsY ? Math.min(clip.bottom, rect.bottom) : clip.bottom,
+          }
+        }
+
+        current = current.parentElement
+      }
+
+      return clip
+    }
+    let textNode = walker.nextNode()
+
+    while (textNode) {
+      const text = textNode.textContent?.replace(/\s+/g, ' ').trim() ?? ''
+
+      if (text.length > 0) {
+        const range = document.createRange()
+        range.selectNodeContents(textNode)
+
+        for (const rect of Array.from(range.getClientRects())) {
+          if (rect.width > 0 && rect.height > 0) {
+            const viewportOverflow = {
+              left: rect.left < -epsilon,
+              top: rect.top < -epsilon,
+              right: rect.right > viewportWidth + epsilon,
+              bottom: rect.bottom > viewportHeight + epsilon,
+            }
+            const clipBox = getClipBox(textNode.parentElement)
+            const clipOverflow = {
+              left: rect.left < clipBox.left - epsilon,
+              top: rect.top < clipBox.top - epsilon,
+              right: rect.right > clipBox.right + epsilon,
+              bottom: rect.bottom > clipBox.bottom + epsilon,
+            }
+            const overflow = mergeOverflow(viewportOverflow, clipOverflow)
+
+            textRanges.push({
+              text,
+              box: rectToObject(rect),
+              clipBox,
+              overflow,
+              isOverflowing: Object.values(overflow).some(Boolean),
+            })
+          }
+        }
+
+        range.detach()
+      }
+
+      textNode = walker.nextNode()
+    }
 
     return {
       viewport: {
-        width: document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight,
+        width: viewportWidth,
+        height: viewportHeight,
       },
       body: {
         scrollWidth: document.body.scrollWidth,
@@ -73,6 +155,7 @@ async function collectLayoutInfo(page) {
       },
       storyRoot: storyRoot ? rectToObject(storyRoot.getBoundingClientRect()) : null,
       canvases,
+      overflowingText: textRanges.filter((item) => item.isOverflowing),
     }
   })
 }
@@ -88,6 +171,7 @@ async function main() {
 
   const browser = await chromium.launch(launchOptions)
   const manifest = []
+  const failures = []
 
   try {
     for (const target of targets) {
@@ -108,6 +192,18 @@ async function main() {
         const filename = `${target.name}-${viewport.name}-${viewport.width}x${viewport.height}.png`
         const screenshotPath = path.join(outputDir, filename)
         await page.screenshot({ path: screenshotPath })
+        const layout = await collectLayoutInfo(page)
+        const hasBodyOverflow = layout.body.scrollWidth > viewport.width || layout.body.scrollHeight > viewport.height
+        const hasOverflowingText = layout.overflowingText.length > 0
+
+        if (hasBodyOverflow || hasOverflowingText) {
+          failures.push({
+            storyId: target.id,
+            viewport,
+            hasBodyOverflow,
+            overflowingText: layout.overflowingText,
+          })
+        }
 
         manifest.push({
           storyId: target.id,
@@ -115,7 +211,7 @@ async function main() {
           viewport,
           url,
           screenshotPath,
-          layout: await collectLayoutInfo(page),
+          layout,
         })
 
         await page.close()
@@ -130,6 +226,11 @@ async function main() {
 
   console.log(`Saved ${manifest.length} screenshots to ${outputDir}`)
   console.log(`Wrote ${manifestPath}`)
+
+  if (failures.length > 0) {
+    console.error(JSON.stringify({ failures }, null, 2))
+    process.exitCode = 1
+  }
 }
 
 main().catch((error) => {

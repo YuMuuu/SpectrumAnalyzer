@@ -19,8 +19,8 @@ export default function VolumeMeter({level, peak = level, className}: VolumeMete
 
   return (
     <div className={`flex h-full flex-col rounded-[1.25rem] border border-gotham-line/70 bg-[linear-gradient(180deg,rgba(5,11,20,0.82)_0%,rgba(8,15,27,0.95)_100%)] p-3 ${className ?? ''}`}>
-      <div className="flex min-h-0 flex-1 gap-3">
-        <div className="flex flex-col justify-between py-1 text-[10px] leading-none text-gotham-text/62">
+      <div className="spectrum-meter-inner flex min-h-0 flex-1 gap-3">
+        <div className="spectrum-meter-labels flex flex-col justify-between py-1 text-[10px] leading-none text-gotham-text/62">
           {tickMarks.map((tick) => (
             <span key={tick} className="select-none font-normal tracking-[0.08em]">
               {formatDb(tick)}

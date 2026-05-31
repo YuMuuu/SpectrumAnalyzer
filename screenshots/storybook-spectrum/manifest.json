@@ -28,7 +28,8 @@
         "bottom": 238,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -60,7 +61,8 @@
         "bottom": 400,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -92,7 +94,8 @@
         "bottom": 700,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -124,7 +127,8 @@
         "bottom": 238,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -156,7 +160,8 @@
         "bottom": 400,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -188,7 +193,107 @@
         "bottom": 700,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--neon-lift",
+    "storyName": "spectrum-neon-lift",
+    "viewport": {
+      "name": "min",
+      "width": 492,
+      "height": 238
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--neon-lift&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-neon-lift-min-492x238.png",
+    "layout": {
+      "viewport": {
+        "width": 492,
+        "height": 238
+      },
+      "body": {
+        "scrollWidth": 492,
+        "scrollHeight": 238
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 492,
+        "height": 238,
+        "top": 0,
+        "right": 492,
+        "bottom": 238,
+        "left": 0
+      },
+      "canvases": [],
+      "overflowingText": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--neon-lift",
+    "storyName": "spectrum-neon-lift",
+    "viewport": {
+      "name": "standard",
+      "width": 800,
+      "height": 400
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--neon-lift&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-neon-lift-standard-800x400.png",
+    "layout": {
+      "viewport": {
+        "width": 800,
+        "height": 400
+      },
+      "body": {
+        "scrollWidth": 800,
+        "scrollHeight": 400
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 800,
+        "height": 400,
+        "top": 0,
+        "right": 800,
+        "bottom": 400,
+        "left": 0
+      },
+      "canvases": [],
+      "overflowingText": []
+    }
+  },
+  {
+    "storyId": "plugin-spectrumanalyzer--neon-lift",
+    "storyName": "spectrum-neon-lift",
+    "viewport": {
+      "name": "wide",
+      "width": 1200,
+      "height": 700
+    },
+    "url": "http://127.0.0.1:7007/iframe.html?id=plugin-spectrumanalyzer--neon-lift&viewMode=story",
+    "screenshotPath": "screenshots/storybook-spectrum/spectrum-neon-lift-wide-1200x700.png",
+    "layout": {
+      "viewport": {
+        "width": 1200,
+        "height": 700
+      },
+      "body": {
+        "scrollWidth": 1200,
+        "scrollHeight": 700
+      },
+      "storyRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 1200,
+        "height": 700,
+        "top": 0,
+        "right": 1200,
+        "bottom": 700,
+        "left": 0
+      },
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -220,7 +325,8 @@
         "bottom": 238,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -252,7 +358,8 @@
         "bottom": 400,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   },
   {
@@ -284,7 +391,8 @@
         "bottom": 700,
         "left": 0
       },
-      "canvases": []
+      "canvases": [],
+      "overflowingText": []
     }
   }
 ]
